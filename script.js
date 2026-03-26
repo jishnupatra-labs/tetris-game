@@ -1,14 +1,62 @@
+// ===== BOARD CONFIG =====
+const COLS = 12;
+const ROWS = 25;
+const BLOCK_SIZE = 15;
+const NEXT_BLOCK_SIZE = BLOCK_SIZE / 2;
+
+// ===== CANVAS SETUP =====
 const canvas = document.getElementById('tetris');
 const context = canvas.getContext('2d');
 
 const nextCanvas = document.getElementById('next');
 const nextContext = nextCanvas.getContext('2d');
 
-context.scale(20, 20);
-nextContext.scale(20, 20);
+canvas.width = COLS * BLOCK_SIZE;
+canvas.height = ROWS * BLOCK_SIZE;
 
+nextCanvas.width = 4 * NEXT_BLOCK_SIZE;
+nextCanvas.height = 4 * NEXT_BLOCK_SIZE;
+
+context.scale(BLOCK_SIZE, BLOCK_SIZE);
+nextContext.scale(NEXT_BLOCK_SIZE, NEXT_BLOCK_SIZE);
+
+// ===== COLORS =====
+const colors = [
+  null,
+  '#FF0D72','#0DC2FF','#0DFF72',
+  '#F538FF','#FF8E0D','#FFE138','#3877FF',
+];
+
+// ===== GAME STATE =====
+const arena = createMatrix(COLS, ROWS);
+
+const player = {
+  pos: { x: 0, y: 0 },
+  matrix: null
+};
+
+const pieces = 'TJLOSZI';
+let nextPiece = createPiece(randomPiece());
+
+let score = 0;
+
+let dropCounter = 0;
+let baseDropInterval = 1000;
+let dropInterval = baseDropInterval;
+let lastTime = 0;
+
+let speedMultiplier = 1;
+
+let isGameOver = false;
+let isPaused = false;
+
+// ===== MATRIX HELPERS =====
 function createMatrix(w, h) {
   return Array.from({ length: h }, () => Array(w).fill(0));
+}
+
+function randomPiece() {
+  return pieces[Math.floor(Math.random() * pieces.length)];
 }
 
 function createPiece(type) {
@@ -23,6 +71,7 @@ function createPiece(type) {
   }
 }
 
+// ===== DRAW =====
 function drawMatrix(matrix, offset, ctx = context) {
   matrix.forEach((row, y) => {
     row.forEach((value, x) => {
@@ -34,10 +83,27 @@ function drawMatrix(matrix, offset, ctx = context) {
   });
 }
 
+function draw() {
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawMatrix(arena, { x: 0, y: 0 });
+  drawMatrix(player.matrix, player.pos);
+}
+
 function drawNext() {
-  nextContext.fillStyle = '#000';
-  nextContext.fillRect(0, 0, nextCanvas.width, nextCanvas.height);
-  drawMatrix(nextPiece, {x: 1, y: 1}, nextContext);
+  nextContext.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  drawMatrix(nextPiece, { x: 1, y: 1 }, nextContext);
+}
+
+// ===== COLLISION =====
+function collide(arena, player) {
+  return player.matrix.some((row, y) => {
+    return row.some((value, x) => {
+      return value !== 0 &&
+        (arena[y + player.pos.y] &&
+         arena[y + player.pos.y][x + player.pos.x]) !== 0;
+    });
+  });
 }
 
 function merge(arena, player) {
@@ -50,52 +116,42 @@ function merge(arena, player) {
   });
 }
 
-function collide(arena, player) {
-  return player.matrix.some((row, y) => {
-    return row.some((value, x) => {
-      return value !== 0 &&
-        (arena[y + player.pos.y] &&
-         arena[y + player.pos.y][x + player.pos.x]) !== 0;
-    });
-  });
-}
-
+// ===== ROW CLEAR =====
 function sweepRows() {
-  for (let y = arena.length - 1; y >= 0; --y) {
-    if (arena[y].every(value => value !== 0)) {
-      const row = arena.splice(y, 1)[0].fill(0);
-      arena.unshift(row);
-      ++y;
+  let linesCleared = 0;
+
+  outer: for (let y = arena.length - 1; y >= 0; y--) {
+    for (let x = 0; x < arena[y].length; x++) {
+      if (arena[y][x] === 0) continue outer;
     }
+
+    const row = arena.splice(y, 1)[0].fill(0);
+    arena.unshift(row);
+    y++;
+    linesCleared++;
+  }
+
+  if (linesCleared > 0) {
+    score += linesCleared;
+    updateScore();
+
+    // Speed increases every 5 lines
+    speedMultiplier = Math.floor(score / 5) + 1;
+    dropInterval = baseDropInterval / speedMultiplier;
   }
 }
 
-/* ✅ SPEED SYSTEM */
-let baseDropInterval = 1000;
-let speedMultiplier = 1;
-
-function updateSpeed() {
-  speedMultiplier = Math.floor(blocksPlaced / 15) + 1;
-
-  dropInterval = baseDropInterval / speedMultiplier;
-
-  document.getElementById('speed').innerText = speedMultiplier + "x";
-}
-
-/* DROP */
+// ===== PLAYER =====
 function playerDrop() {
   player.pos.y++;
+
   if (collide(arena, player)) {
     player.pos.y--;
     merge(arena, player);
-
-    blocksPlaced++;
-    updateScore();
-    updateSpeed(); // ✅ NEW
-
     sweepRows();
     playerReset();
   }
+
   dropCounter = 0;
 }
 
@@ -105,17 +161,21 @@ function playerMove(dir) {
 }
 
 function rotate(matrix) {
-  return matrix[0].map((_, i) => matrix.map(row => row[i])).reverse();
+  return matrix[0].map((_, i) =>
+    matrix.map(row => row[i])
+  ).reverse();
 }
 
 function playerRotate() {
   const pos = player.pos.x;
   let offset = 1;
+
   player.matrix = rotate(player.matrix);
 
   while (collide(arena, player)) {
     player.pos.x += offset;
     offset = -(offset + (offset > 0 ? 1 : -1));
+
     if (offset > player.matrix[0].length) {
       player.matrix = rotate(player.matrix);
       player.pos.x = pos;
@@ -126,46 +186,49 @@ function playerRotate() {
 
 function playerReset() {
   player.matrix = nextPiece;
-  nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+  nextPiece = createPiece(randomPiece());
   drawNext();
 
   player.pos.y = 0;
   player.pos.x = (arena[0].length / 2 | 0) -
                  (player.matrix[0].length / 2 | 0);
 
-  if (collide(arena, player)) gameOver();
+  if (collide(arena, player)) {
+    gameOver();
+  }
 }
 
-function draw() {
-  context.fillStyle = '#000';
-  context.fillRect(0, 0, canvas.width, canvas.height);
-
-  drawMatrix(arena, {x: 0, y: 0});
-  drawMatrix(player.matrix, player.pos);
-}
-
-/* GAME LOOP */
-let dropCounter = 0;
-let dropInterval = 1000;
-let lastTime = 0;
-let isGameOver = false;
-
+// ===== GAME LOOP =====
 function update(time = 0) {
-  if (isGameOver) return;
+  if (isGameOver || isPaused) return;
 
   const deltaTime = time - lastTime;
   lastTime = time;
 
   dropCounter += deltaTime;
-  if (dropCounter > dropInterval) playerDrop();
+
+  if (dropCounter > dropInterval) {
+    playerDrop();
+  }
 
   draw();
   requestAnimationFrame(update);
 }
 
-/* CONTROLS */
+// ===== UI FUNCTIONS =====
+function updateScore() {
+  document.getElementById('score').innerText = score;
+}
+
+function gameOver() {
+  isGameOver = true;
+  document.getElementById('finalScore').innerText = "Score: " + score;
+  document.getElementById('gameOver').classList.remove('hidden');
+}
+
+// ===== CONTROLS =====
 document.addEventListener('keydown', event => {
-  if (isGameOver) return;
+  if (isGameOver || isPaused) return;
 
   if (event.key === 'ArrowLeft') playerMove(-1);
   else if (event.key === 'ArrowRight') playerMove(1);
@@ -173,56 +236,39 @@ document.addEventListener('keydown', event => {
   else if (event.key === 'ArrowUp') playerRotate();
 });
 
-/* COLORS */
-const colors = [
-  null,
-  '#FF0D72','#0DC2FF','#0DFF72',
-  '#F538FF','#FF8E0D','#FFE138','#3877FF',
-];
+// ===== BUTTON EVENTS =====
+document.getElementById('pauseBtn').addEventListener('click', () => {
+  if (isGameOver) return;
 
-const arena = createMatrix(12, 20);
+  isPaused = !isPaused;
+  document.getElementById('pauseBtn').innerText =
+    isPaused ? "Resume Game" : "Pause Game";
 
-const player = {
-  pos: {x: 0, y: 0},
-  matrix: null
-};
+  if (!isPaused) update();
+});
 
-const pieces = 'TJLOSZI';
-let nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
+document.getElementById('retryBtn').addEventListener('click', () => {
+  document.getElementById('gameOver').classList.add('hidden');
+  document.getElementById('startOverlay').classList.remove('hidden');
+});
 
-/* SCORE */
-let blocksPlaced = 0;
+document.getElementById('startGameBtn').addEventListener('click', () => {
+  document.getElementById('startOverlay').classList.add('hidden');
 
-function updateScore() {
-  document.getElementById('score').innerText = blocksPlaced;
-}
-
-/* GAME OVER */
-function gameOver() {
-  isGameOver = true;
-  document.getElementById('gameOver').classList.remove('hidden');
-  document.getElementById('finalScore').innerText =
-    "Blocks Placed: " + blocksPlaced;
-}
-
-/* RESTART */
-function restartGame() {
   arena.forEach(row => row.fill(0));
-  blocksPlaced = 0;
-
+  score = 0;
   updateScore();
-  updateSpeed(); // ✅ reset speed
+
+  speedMultiplier = 1;
+  dropInterval = baseDropInterval;
 
   isGameOver = false;
-  document.getElementById('gameOver').classList.add('hidden');
+  isPaused = false;
 
-  nextPiece = createPiece(pieces[Math.floor(Math.random() * pieces.length)]);
   playerReset();
   update();
-}
+});
 
-/* START */
-updateSpeed(); // ✅ initialize
-playerReset();
+// ===== INITIAL STATE =====
 drawNext();
-update();
+document.getElementById('startOverlay').classList.remove('hidden');
