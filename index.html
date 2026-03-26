@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tetris</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Tetris</h1>
+
+<div class="game-container">
+  <canvas id="tetris" width="240" height="400"></canvas>
+
+  <div class="sidebar">
+    <h3>Next</h3>
+    <canvas id="next" width="80" height="80"></canvas>
+
+    <h3>Blocks Placed</h3>
+    <div id="score">0</div>
+
+    <h3>Speed</h3>
+    <div id="speed">1x</div>
+  </div>
+</div>
+
+<div id="gameOver" class="hidden">
+  <div class="popup">
+    <h2>Game Over</h2>
+    <p id="finalScore"></p>
+    <button onclick="restartGame()">Retry</button>
+  </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
