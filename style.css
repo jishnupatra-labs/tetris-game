@@ -5,42 +5,32 @@ body {
     font-family: Arial, sans-serif;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 100vh;
+    overflow-y: auto;
 }
 
-/* TITLE */
 .game-title {
-    margin: 10px 0 5px 0;
-    font-size: 48px;
-    font-weight: 900;
-    letter-spacing: 5px;
-    background: linear-gradient(
-        90deg,
-        red,
-        orange,
-        yellow,
-        green,
-        cyan,
-        violet
-    );
+    margin: 15px 0;
+    font-size: 42px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    background: linear-gradient(90deg, red, orange, yellow, green, cyan, violet);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
-/* Layout */
+/* Main Layout */
 .game-wrapper {
     display: flex;
     gap: 20px;
+    transform-origin: top center;
 }
 
-/* Arena Panel */
+/* Arena */
 .left-panel {
     background: #000;
     padding: 5px;
-    border: 4px solid #555;   /* ✅ Arena Border */
-    box-shadow: 0 0 15px #000;
+    border: 4px solid #555;
 }
 
 /* Sidebar */
@@ -50,19 +40,18 @@ body {
     gap: 20px;
 }
 
-/* Score Box */
+/* Score */
 .score-box {
     background: #222;
     padding: 10px 15px;
     border-radius: 6px;
-    font-size: 16px;
     display: flex;
     justify-content: space-between;
     width: 150px;
     border: 2px solid #444;
 }
 
-/* Next Box */
+/* Next */
 .next-box {
     background: #222;
     padding: 10px;
@@ -71,7 +60,7 @@ body {
     border: 2px solid #444;
 }
 
-/* Buttons */
+/* Button */
 button {
     padding: 8px;
     font-size: 14px;
@@ -85,14 +74,23 @@ button {
     min-height: 36px;
 }
 
+/* Responsive Layout Switch */
+@media (max-width: 900px) {
+    .game-wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .right-panel {
+        align-items: center;
+    }
+}
+
 /* Overlay */
 .overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.8);
+    inset: 0;
+    background: rgba(0,0,0,0.85);
     display: flex;
     justify-content: center;
     align-items: center;
@@ -109,7 +107,6 @@ button {
     text-align: center;
 }
 
-/* Pulsing Start Button */
 .pulse-btn {
     font-size: 20px;
     padding: 15px 30px;
