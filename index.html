@@ -1,49 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Tetris Game</title>
+    <title>Tetris</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1 class="game-title">TETRIS</h1>
+    <h1 class="title">TETRIS</h1>
 
-<div class="game-wrapper">
+    <div class="game-wrapper">
 
-    <div class="left-panel">
-        <canvas id="tetris"></canvas>
-    </div>
-
-    <div class="right-panel">
-        
-        <div class="score-box">
-            <span>Score:</span>
-            <span id="score">0</span>
+        <div class="arena-wrapper">
+            <canvas id="tetris"></canvas>
         </div>
 
-        <div class="next-box">
-            <p>Next</p>
-            <canvas id="next"></canvas>
+        <div class="side-panel">
+            <div class="score-box">
+                Score: <span id="score">0</span>
+            </div>
+
+            <div class="next-box">
+                <p>Next</p>
+                <canvas id="next"></canvas>
+            </div>
+
+            <button id="pauseBtn">Pause Game</button>
         </div>
 
-        <button id="pauseBtn">Pause Game</button>
     </div>
 
-</div>
-
-<!-- Game Over Popup -->
-<div id="gameOver" class="overlay hidden">
-    <div class="popup">
+    <div id="gameOver" class="overlay hidden">
         <h2>Game Over</h2>
         <p id="finalScore"></p>
         <button id="retryBtn">Retry</button>
     </div>
-</div>
 
-<!-- Start Game Overlay -->
-<div id="startOverlay" class="overlay hidden">
-    <button id="startGameBtn" class="pulse-btn">Start New Game</button>
-</div>
+    <div id="startOverlay" class="overlay">
+        <button id="startGameBtn">Start Game</button>
+    </div>
 
 <script src="script.js"></script>
 </body>
