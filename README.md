@@ -1,58 +1,114 @@
-***Tetris Game***
+# Tetris Game (Browser Version)
 
-A classic browser-based Tetris game built using HTML, CSS, and Vanilla JavaScript.
+A fully functional browser-based Tetris game built using **HTML, CSS, and Vanilla JavaScript**.
 
-This project is built as a modular and extendable implementation of Tetris, focusing on clean structure, gameplay logic, and progressive feature expansion.
+This version includes textured blocks, arena background, score tracking, speed ramp-up, pause functionality, and game overlays.
 
-Features :
-7 Standard Tetris Pieces (T, J, L, O, S, Z, I)
-Smooth rotation with wall kick logic
-Next piece preview
-Speed scaling system
-Blocks placed counter
-Game over popup with retry option
-Increasing difficulty as blocks increase
+---
 
-Tech Stack :
-HTML5 (Canvas)
-CSS3
-JavaScript (ES6)
-Git for version control
+## Features
 
-Project Structure : 
-tetris-game/
+* Classic Tetris gameplay
+* Speed increases progressively as lines are cleared
+* Score tracking
+* Next piece preview
+* Pause and Resume functionality
+* Game Over screen with final score display
+* Textured blocks
+* Arena background texture
+* Keyboard controls
+* Fully playable in modern browsers
+
+---
+
+## Controls
+
+| Key          | Action         |
+| ------------ | -------------- |
+| ←            | Move Left      |
+| →            | Move Right     |
+| ↓            | Soft Drop      |
+| ↑            | Rotate         |
+| Pause Button | Pause / Resume |
+
+---
+
+## Project Structure
+
+```
+project-folder/
 │
 ├── index.html
 ├── style.css
 ├── script.js
-└── README.md
+└── assets/
+    ├── squaretile-block.png
+    └── arena-background.jpg
+```
 
-Game Mechanics : 
-Pieces fall automatically.
-Speed increases based on blocks placed.
-Game ends when new piece collides at spawn.
-Restart option available after Game Over.
+---
 
-Learning Objectives : 
+## How to Run
 
-This project focuses on:
-Matrix-based grid systems
-Collision detection
-Game loop implementation
-Dynamic difficulty scaling
-Canvas rendering techniques
-Planned Improvements
-Proper scoring system (line-based scoring)
-Hard drop (Spacebar)
-Ghost piece
-Hold piece functionality
-Sound effects
-Mobile responsiveness
-High score tracking
+1. Clone the repository:
 
-How to Run : 
-Clone the repository
-Open index.html in any modern browser
-And Play
+```
+git clone <your-repo-url>
+```
 
-Author : Jishnu Patra
+2. Navigate to the project folder:
+
+```
+cd <project-folder>
+```
+
+3. Open `index.html` in any modern browser.
+
+No server setup or installation required.
+
+---
+
+## Gameplay Logic
+
+* The arena size is fixed at 12 columns x 25 rows.
+* Each cleared row increases score by 1.
+* Game speed increases progressively after line clears.
+* Collision detection prevents overlap and boundary overflow.
+* Game ends when new piece collides at spawn position.
+
+---
+
+## Technical Details
+
+* No external libraries
+* Pure JavaScript (ES6)
+* Canvas-based rendering
+* Texture-based block rendering using images
+* Responsive layout adjustments
+* Modular game loop using `requestAnimationFrame`
+
+---
+
+## Future Enhancements (Optional Ideas)
+
+* High score using Local Storage
+* Sound effects
+* Mobile touch controls
+* Hard drop feature
+* Ghost piece preview
+* Level system
+* Mobile app wrapper (PWA or WebView)
+
+---
+
+## Browser Compatibility
+
+Tested on:
+
+* Chrome
+* Edge
+* Firefox
+
+Any modern browser supporting HTML5 Canvas should work.
+
+---
